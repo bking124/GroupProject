@@ -24,18 +24,18 @@ circle function that will draw a circle on the screen
 
 **Graphical Framework**
 
-*Configuration
-*GLUT_Plotter.h
-*GLUT_Plotter.cpp
-*GroupProject.h
-*GroupProject.cpp
-*GroupProjectDriver.cpp
+* Configuration
+* GLUT_Plotter.h
+* GLUT_Plotter.cpp
+* GroupProject.h
+* GroupProject.cpp
+* GroupProjectDriver.cpp
 
 **Team**
 
-*Jordan Potarf
-*Brian King
-*Wes Meier
-*Nathan Eden
-*Pearson Reese
+* Jordan Potarf
+* Brian King
+* Wes Meier
+* Nathan Eden
+* Pearson Reese
 
