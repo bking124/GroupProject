@@ -25,11 +25,11 @@ circle function that will draw a circle on the screen
 **Graphical Framework**
 
 * Configuration
-* GLUT_Plotter.h
-* GLUT_Plotter.cpp
-* GroupProject.h
-* GroupProject.cpp
-* GroupProjectDriver.cpp
+* [GLUT_Plotter.h](https://github.com/potarf/GroupProject/blob/master/GLUT_Plotter.h)
+* [GLUT_Plotter.cpp](https://github.com/potarf/GroupProject/blob/master/GLUT_Plotter.cpp)
+* [GroupProject.h](https://github.com/potarf/GroupProject/blob/master/GroupProject.h)
+* [GroupProject.cpp](https://github.com/potarf/GroupProject/blob/master/GroupProject.cpp)
+* [GroupProjectDriver.cpp](https://github.com/potarf/GroupProject/blob/master/GroupProjectDriver.cpp)
 
 **Team**
 
