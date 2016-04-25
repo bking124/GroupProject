@@ -1,10 +1,11 @@
 #include "SplayTree.h"
+#include <string>
 
 using namespace std;
 
 void SplayNode::printPreorder(ostream &os, string indent) const{
-    if (this != NULL) {
-	    os << indent << this->data << endl;
+	if (this != NULL) {
+		os << indent << this->data << endl;
 		this->left->printPreorder(os, indent + "  ");
 		this->right->printPreorder(os, indent + "  ");
 	}
@@ -12,136 +13,179 @@ void SplayNode::printPreorder(ostream &os, string indent) const{
 		os << indent << "NULL" << endl;
 }
 
-SplayNode* SplayTree::insertNode(int data, SplayNode* root){
-   static SplayNode* p_node = NULL;
-   if (!p_node)
-       p_node = new SplayNode(data);
-   else
-       p_node->data = data;
-
-
-   if (!root)
-       root = p_node;
-   else {
-       root = splay(data, root);
-       /* This is BST that, all data <= root->data is in root->left, all data >
-       root->data is in root->right. */
-       if (data < root->data)
-       {
-           p_node->left = root->left;
-           p_node->right = root;
-           root->left = NULL;
-           root = p_node;
-       }
-       else if (data > root->data)
-       {
-           p_node->right = root->right;
-           p_node->left = root;
-           root->right = NULL;
-           root = p_node;
-       }
-   }
-
-   p_node = NULL;
-   return root;
+SplayNode* SplayNode::minNode(){
+	SplayNode* temp = this;
+	if (temp != NULL) {
+		while (temp->left != NULL)
+			temp = temp->left;
+	}
+	return temp;
 }
 
-SplayNode* SplayTree::deleteNode(int data, SplayNode* root){
-    SplayNode* temp;
-    if (!root)
-        return NULL;
-    root = splay(data, root);
-    if (data != root->data)
-        return root;
-    else
-    {
-       if (!root->left)
-       {
-           temp = root;
-           root = root->right;
-       }
-       else
-       {
-           temp = root;
-           /*Note: Since data == root->data,
-           so after splay(data, root->left),
-           the tree we get will have no right child tree.*/
-           root = splay(data, root->left);
-           root->right = temp->right;
-       }
-       //free(temp);
-       return root;
-    }
+SplayNode* SplayTree::find(int data){
+	SplayNode* temp = root;
+	//Default return value if not found
+	SplayNode* result = NULL;
+	while (temp != NULL) {
+		if (data > temp->data)
+			temp = temp->right;
+		else if (data < temp->data)
+			temp = temp->left;
+		else
+			result = temp;
+	}
+	return result;
 }
 
-SplayNode* SplayTree::splay(int data, SplayNode* root){
-    if (!root)
-        return NULL;
-    SplayNode header;
-    /* header.right points to L tree;
-    header.left points to R Tree */
-    header.left = header.right = NULL;
-    SplayNode* LeftTreeMax = &header;
-    SplayNode* RightTreeMin = &header;
-    while (1)
-    {
-       if (data < root->data)
-       {
-           if (!root->left)
-               break;
-           if (data < root->left->data)
-           {
-               root = RR_Rotate(root);
-               // only zig-zig mode need to rotate once,
-               if (!root->left)
-                    break;
-           }
-           /* Link to R Tree */
-           RightTreeMin->left = root;
-           RightTreeMin = RightTreeMin->left;
-           root = root->left;
-           RightTreeMin->left = NULL;
-           }
-       else if (data > root->data)
-       {
-           if (!root->right)
-               break;
-           if (data > root->right->data)
-           {
-               root = LL_Rotate(root);
-               // only zag-zag mode need to rotate once,
-               if (!root->right)
-                   break;
-           }
-           /* Link to L Tree */
-           LeftTreeMax->right = root;
-           LeftTreeMax = LeftTreeMax->right;
-           root = root->right;
-           LeftTreeMax->right = NULL;
-       }
-       else
-           break;
-    }
-    /* assemble L Tree, Middle Tree and R tree */
-    LeftTreeMax->right = root->left;
-    RightTreeMin->left = root->right;
-    root->left = header.right;
-    root->right = header.left;
-    return root;
+void SplayTree::swap(SplayNode* old, SplayNode* newer){
+	if (old->par == NULL)
+		root = newer;
+	else if (old == old->par->left)
+		old->par->left = newer;
+	else
+		old->par->right = newer;
+	if (newer != NULL)
+		newer->par = old->par;
 }
 
-SplayNode* SplayTree::LL_Rotate(){
-    SplayNode* k1 = k2->right;
-    k2->right = k1->left;
-    k1->left = k2;
-    return k1;
+void SplayTree::insertNode(int data){
+	if (root == NULL)
+		root = new SplayNode(data);
+	else {
+		SplayNode* temp = root;
+		bool insert = false;
+
+		//Find place to insert and create node
+		while (!insert && data != temp->data) {
+			if (data < temp->data) {
+				if (temp->left == NULL) {
+					temp->left = new SplayNode(data);
+					temp->left->par = temp;
+					splay(temp->left);
+					insert = true;
+				}
+				else
+					temp = temp->left;
+			}
+			else if (data > temp->data){
+				if (temp->right == NULL) {
+					temp->right = new SplayNode(data);
+					temp->right->par = temp;
+					splay(temp->right);
+					insert = true;
+				}
+				else
+					temp = temp->right;
+			}
+		}
+		if (!insert)
+			splay(temp);
+	}
 }
 
-SplayNode* SplayTree::RR_Rotate(){
-    SplayNode* k1 = k2->left;
-    k2->left = k1->right;
-    k1->right = k2;
-    return k1;
+void SplayTree::deleteNode(int data){
+	SplayNode* temp = find(data);
+	if (temp != NULL){
+
+		splay(temp);
+
+		if (temp->left == NULL)
+			swap(temp, temp->right);
+		else if (temp->right == NULL)
+			swap(temp, temp->left);
+		else {
+			SplayNode *min = temp->right->minNode();
+			if (min->par != temp) {
+				swap(min, min->right);
+				min->right = temp->right;
+				temp->right->par = min;
+			}
+			swap(temp, min);
+			min->left = temp->left;
+			temp->left->par = min;
+		}
+
+		delete temp;
+	}
 }
 
+void SplayTree::splay(SplayNode* cur){
+	//Repeat until cur == root
+	while (cur->par != NULL){
+		//One rotation needed (simple zig)
+		if (cur->par->par == NULL){
+			if (cur->par->left = cur)
+				rotateRight(cur->par);
+			else
+				rotateLeft(cur->par);
+		}
 
+		//Zig-Zig Rotation in left subtree of cur->par->par
+		else if ( cur->par->left == cur && cur->par->par->left == cur->par) {
+			rotateRight(cur->par->par);
+			rotateRight(cur->par);
+		}
+
+		//Zig-Zig Rotation in right subtree of cur->par->par
+		else if (cur->par->right == cur && cur->par->par->right == cur->par) {
+			rotateLeft(cur->par->par);
+			rotateLeft(cur->par);
+		}
+
+		//Zig-Zag Rotation in right subtree of cur->par->par
+		else if (cur->par->left == cur && cur->par->par->right == cur->par) {
+			rotateRight(cur->par);
+			rotateLeft(cur->par);
+		}
+
+		//Only other option: Zig-Zag Rotation in left subtree of cur->par->par
+		else {
+			rotateLeft(cur->par);
+			rotateRight(cur->par);
+		}
+	}
+}
+
+void SplayTree::rotateLeft(SplayNode* cur){
+	SplayNode* temp = cur->right;
+
+	//Perform rotations by moving around left and right pointers
+	if (temp != NULL){
+		cur->right = temp->left;
+		if (temp->left != NULL)
+			temp->left->par = cur;
+		temp->par = cur->par;
+		temp->left = cur;
+	}
+
+	//Fix parent pointers
+	if (cur->par == NULL)
+		root = temp;
+	else if (cur == cur->par->left)
+		cur->par->left = temp;
+	else
+		cur->par->right = temp;
+	cur->par = temp;
+}
+
+void SplayTree::rotateRight(SplayNode* cur){
+	SplayNode* temp = cur->left;
+
+	//Perform rotations by moving around left and right pointers
+	if (temp != NULL){
+		cur->left = temp->right;
+		if (temp->right != NULL)
+			temp->right->par = cur;
+		temp->par = cur->par;
+		temp->right = cur;
+	}
+
+	//Fix parent pointers (same as in leftRotate)
+	if (cur->par == NULL)
+		root = temp;
+	else if (cur == cur->par->left)
+		cur->par->left = temp;
+	else
+		cur->par->right = temp;
+	cur->par = temp;
+}
