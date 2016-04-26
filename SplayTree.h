@@ -2,6 +2,7 @@
 #define SPLAY_TREE_H
 
 #include <iostream>
+#include <string>
 
 using namespace std;
 
@@ -9,39 +10,50 @@ class SplayTree;
 
 class SplayNode{
 public:
-    SplayNode(int d, SplayNode *l = NULL, SplayNode *r = NULL):
-        data(d), left(l), right(r) {}
-    ~SplayNode() { delete left; delete right; }
+	friend class SplayTree;
+	SplayNode(int d = 0, SplayNode *l = NULL, SplayNode *r = NULL, SplayNode *p = NULL) :
+		data(d), left(l), right(r), par(p) {}
+	~SplayNode() { delete left; delete right; }
 
-    void printPreorder(ostream &os = cout, string indent = "") const;
+	void printPreorder(ostream &os = cout, string indent = "") const;
 
-    int data;
-    SplayNode* left;
-    SplayNode* right;
+	int getData() { return data; }
+	SplayNode* getLeft() { return left; }
+	SplayNode* getRight() { return right; }
+	SplayNode* minNode();
+
+protected:
+	int data;
+	SplayNode* left;
+	SplayNode* right;
+	SplayNode* par; //parent pointer
 };
 
 class SplayTree{
 public:
-    SplayTree() : root(NULL) {}
-    virtual ~SplayTree() { delete root; }
+	SplayNode *root;
 
-    SplayNode* insertNode(int data, SplayNode* root);
-    SplayNode* deleteNode(int data, SplayNode* root);
-    SplayNode* search(int data, SplayNode* root)
-        { return splay(data, root); }
+	SplayTree() : root(NULL) {}
+	virtual ~SplayTree() { delete root; }
 
-    void printPreorder(ostream &os = cout) const
-        { if (root) root->printPreorder(os); }
+	void insertNode(int data);
+	void deleteNode(int data);
+	SplayNode* find(int data);
+	void swap(SplayNode* old, SplayNode* newer);
+	void search(int data);
 
-    SplayNode *root;
+	void printPreorder(ostream &os = cout) const
+	{
+		if (root) root->printPreorder(os);
+	}
+
+	SplayNode* getRoot() { return root; }
 
 protected:
 
-    SplayNode* LL_Rotate();
-    SplayNode* RR_Rotate();
-
-
-    SplayNode* splay(int data, SplayNode* root);
+	void rotateLeft(SplayNode* current);
+	void rotateRight(SplayNode* current);
+	void splay(SplayNode* current);
 };
 
 #endif // SPLAY_TREE_H
